@@ -24,33 +24,51 @@ func compress(chars []byte) int {
 	if len(chars) == 1 {
 		return 1
 	}
+
 	currCharIndex := 0
+  nextCharPlacement := 0
 	resultLength := 0
 
 	for i := 1; i < len(chars); i++ {
+		if chars[i] != chars[currCharIndex] || i == len(chars) - 1 {
+      var distance int
+      lastIsDiff := false
 
-		if chars[i] != chars[currCharIndex] || (i == len(chars)-1 && i-currCharIndex >= 1) {
-			var subArr []byte
-			var numSteps int
+      if i == len(chars) - 1 {
+        if chars[i] != chars[currCharIndex] {
+          distance = i - currCharIndex
+          resultLength++
+          lastIsDiff = true
+        } else {
+          distance = i+1 - currCharIndex
+        }
+      } else {
+        distance = i - currCharIndex
+      }
 
-			if i < len(chars)-1 {
-				subArr = chars[currCharIndex+1 : i]
-				numSteps = i - currCharIndex
-			} else {
-				subArr = chars[currCharIndex+1 : i+1]
-				numSteps = i - currCharIndex
-			}
+      distanceDigitLength := distance
 
-			if numSteps > 1 {
-				numLength := addNum(subArr, numSteps)
-				currCharIndex += numLength + 1
-				chars[currCharIndex] = chars[i]
-				resultLength += numLength + 1
+      chars[nextCharPlacement] = chars[currCharIndex]
+      if distance > 1 {
+        if i - (nextCharPlacement+1) > 0 {
+          distanceDigitLength = addNum(chars[nextCharPlacement+1: i], distance)
+        } else {
+          distanceDigitLength = addNum(chars[nextCharPlacement+1: i+1], distance)
+        }
+      }
 
-			} else {
-				currCharIndex += 1
-				resultLength++
-			}
+      nextCharPlacement += distanceDigitLength
+      currCharIndex = i 
+      resultLength += distanceDigitLength
+
+      if distance > 1 {
+        nextCharPlacement++
+        resultLength++
+
+        if i == len(chars) - 1 && lastIsDiff {
+          chars[nextCharPlacement] = chars[i]
+        }
+      }
 
 		}
 
@@ -60,7 +78,8 @@ func compress(chars []byte) int {
 }
 
 func main() {
-	arr := []byte{'a', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'c'}
+	arr := []byte{'a', 'a', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b'}
+  // arr := []byte{'a', 'a', 'a'}
 	length := compress(arr)
 
 	fmt.Printf("compressed %s, length %d", arr, length)
